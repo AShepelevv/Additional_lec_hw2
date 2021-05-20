@@ -1,7 +1,6 @@
 import executor.CorrectnesCheckExecutor;
 import executor.SpeedCheckExecutor;
 import operation.Operation;
-import operation.OperationType;
 import tree.Tree;
 
 import java.util.HashSet;
@@ -11,6 +10,8 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static operation.OperationType.DELETE;
+import static operation.OperationType.INSERT;
 
 public class Main {
     private static final int OPERATION_COUNT = 10000;
@@ -59,10 +60,10 @@ public class Main {
                 .collect(toList());
 
         List<Operation> inserts = range(0, OPERATION_COUNT)
-                .mapToObj(i -> new Operation(OperationType.INSERT, valuesI.get(i)))
+                .mapToObj(i -> new Operation(INSERT, valuesI.get(i)))
                 .collect(toList());
         List<Operation> removes = range(0, OPERATION_COUNT)
-                .mapToObj(i -> new Operation(OperationType.DELETE, valuesR.get(i)))
+                .mapToObj(i -> new Operation(DELETE, valuesR.get(i)))
                 .collect(toList());
 
         List<CorrectnesCheckExecutor> executors = range(0, THREAD_COUNT)
