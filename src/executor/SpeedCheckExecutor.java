@@ -1,6 +1,7 @@
+package executor;
+
 import tree.Tree;
 
-import java.util.List;
 import java.util.Random;
 
 import static java.lang.System.nanoTime;
@@ -22,7 +23,7 @@ public class SpeedCheckExecutor extends Thread {
         long start = nanoTime();
         while (nanoTime() < start + 5_000_000_000L) {
             ++counter;
-            int key = new Random().nextInt(Main.K);
+            int key = new Random().nextInt(100_000);
             double p = Math.random();
             if (p < x) {
                 tree.insert(key);

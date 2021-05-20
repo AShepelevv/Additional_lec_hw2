@@ -1,6 +1,8 @@
+package operation;
+
 public class Operation {
-    OperationType type;
-    int value;
+    public OperationType type;
+    public int value;
 
     public Operation(OperationType type, int value) {
         this.type = type;

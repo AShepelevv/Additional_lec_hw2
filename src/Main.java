@@ -1,3 +1,7 @@
+import executor.CorrectnesCheckExecutor;
+import executor.SpeedCheckExecutor;
+import operation.Operation;
+import operation.OperationType;
 import tree.Tree;
 
 import java.util.HashSet;
