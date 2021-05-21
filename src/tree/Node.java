@@ -13,6 +13,7 @@ import static tree.NodeType.ROUTING;
 public class Node {
     public int value;
     public NodeType type;
+    public boolean deleted = false;
     public Node left;
     public Node right;
     public Lock lock;
@@ -29,6 +30,11 @@ public class Node {
             if (value < cur.value) {
                 if (cur.left == null) {
                     cur.lock.lock();
+                    if (cur.deleted) {
+                        cur.lock.unlock();
+                        cur = this;
+                        continue;
+                    }
                     if (cur.left == null) {
                         if (cur.type == ROUTING) {
                             cur.left = new Node(value, DATA);
@@ -46,17 +52,22 @@ public class Node {
                 cur = cur.left;
             } else if (value == cur.value && cur.type == DATA) {
                 cur.lock.lock();
-                boolean exists = cur.type == DATA;
+                boolean exists = cur.type == DATA && !cur.deleted;
                 cur.lock.unlock();
                 if (exists) {
                     return false;
                 } else {
-                    cur = cur.right;
+                    cur = cur.deleted ? this : cur.right;
                 }
             } else {
                 if (cur.right == null) {
                     cur.lock.lock();
                     if (cur.right == null) {
+                        if (cur.deleted) {
+                            cur.lock.unlock();
+                            cur = this;
+                            continue;
+                        }
                         if (cur.type == ROUTING) {
                             cur.right = new Node(value, DATA);
                             cur.lock.unlock();
@@ -101,9 +112,15 @@ public class Node {
                     cur = cur.right;
                 }
             } else {
+                // Если близко к корню дерева (родитель всегда есть -- вспомогательная вершина)
                 if (g == null) {
                     cur.lock.lock();
                     p.lock.lock();
+                    // Если уже удалили, пробуем еще раз
+                    if (cur.deleted) {
+                        cur = this;
+                        continue;
+                    }
                     if (value < p.value) {
                         p.left = null;
                     } else {
@@ -113,14 +130,28 @@ public class Node {
                     cur.lock.unlock();
                     return true;
                 }
+                // Лочим
                 cur.lock.lock();
                 p.lock.lock();
                 g.lock.lock();
+                // Если кто-то из трех удален, запускаем заново
+                if (g.deleted || p.deleted || cur.deleted) {
+                    g.lock.unlock();
+                    p.lock.unlock();
+                    cur.lock.unlock();
+                    cur = this;
+                    continue;
+                }
+                // Перекидываем ссылки
                 if (p.value < g.value) {
                     g.left = value < p.value ? p.right : p.left;
                 } else {
                     g.right = value < p.value ? p.right : p.left;
                 }
+                // Помечаем удаленными
+                cur.deleted = true;
+                p.deleted = true;
+                // Разлочим
                 g.lock.unlock();
                 p.lock.unlock();
                 cur.lock.unlock();

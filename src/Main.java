@@ -16,7 +16,7 @@ import static operation.OperationType.INSERT;
 public class Main {
     private static final int OPERATION_COUNT = 10000;
     private static final int BOUND = 100000;
-    private static final int THREAD_COUNT = 1;
+    private static final int THREAD_COUNT = 4;
 
     public static final int K = 100_000;
 
@@ -27,7 +27,7 @@ public class Main {
     private static void speedMeasure() throws InterruptedException{
         Tree tree = new Tree();
         prepopulate(tree);
-        double x = 0.1;
+        double x = 0.5;
         List<SpeedCheckExecutor> executors = range(0, THREAD_COUNT)
                 .mapToObj(i -> new SpeedCheckExecutor(tree, x, "" + i))
                 .collect(toList());
